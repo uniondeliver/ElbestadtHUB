@@ -5,7 +5,7 @@
 local ForgeModule = {}
 
 -- Setup du module Forge
-function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles)
+function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     -- Récupère Utils depuis getgenv (chargé dans main.lua)
     local Utils = getgenv().Utils
 
@@ -55,9 +55,15 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles)
 
     -- Variables pour l'auto forge
     local HeaterConnection = nil
+    local UserInputService = game:GetService("UserInputService")
     local VirtualInputManager = game:GetService("VirtualInputManager")
     local RunService = game:GetService("RunService")
     local Players = game:GetService("Players")
+
+    -- Variables pour stocker les positions manuelles
+    -- Positions enregistrées pour le minijeu (modifiables via les boutons)
+    local ManualTopPos = Vector2.new(448, 558)
+    local ManualBottomPos = Vector2.new(409, 1371)
 
     -- Fonction pour automatiser le minijeu Heater
     local function AutoHeater()
@@ -72,23 +78,72 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles)
         local Heater = MeltMinigame:FindFirstChild("Heater")
         if not Heater or not Heater.Visible then return end
 
-        -- Simule mouvement souris bas vers haut rapidement
-        local baseX = Heater.AbsolutePosition.X + Heater.AbsoluteSize.X / 2
-        local topY = Heater.AbsolutePosition.Y
-        local bottomY = Heater.AbsolutePosition.Y + Heater.AbsoluteSize.Y
+        -- Utilise les positions manuelles si elles sont définies
+        if ManualTopPos and ManualBottomPos then
+            -- Mouvement rapide de bas en haut
+            for y = ManualBottomPos.Y, ManualTopPos.Y, -5 do
+                VirtualInputManager:SendMouseMoveEvent(ManualTopPos.X, y, game)
+                task.wait(0.001)
+            end
 
-        -- Mouvement rapide de bas en haut
-        for y = bottomY, topY, -5 do
-            VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
-            task.wait(0.001)
-        end
+            -- Mouvement rapide de haut en bas
+            for y = ManualTopPos.Y, ManualBottomPos.Y, 5 do
+                VirtualInputManager:SendMouseMoveEvent(ManualTopPos.X, y, game)
+                task.wait(0.001)
+            end
+        else
+            -- Fallback sur la position calculée
+            local baseX = Heater.AbsolutePosition.X + Heater.AbsoluteSize.X / 2
+            local topY = Heater.AbsolutePosition.Y
+            local bottomY = Heater.AbsolutePosition.Y + Heater.AbsoluteSize.Y
 
-        -- Mouvement rapide de haut en bas
-        for y = topY, bottomY, 5 do
-            VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
-            task.wait(0.001)
+            for y = bottomY, topY, -5 do
+                VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
+                task.wait(0.001)
+            end
+
+            for y = topY, bottomY, 5 do
+                VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
+                task.wait(0.001)
+            end
         end
     end
+
+    -- Bouton pour définir la position TOP (haut)
+    autoGroupbox:AddButton({
+        Text = "Set TOP Position",
+        Func = function()
+            local mousePos = UserInputService:GetMouseLocation()
+            ManualTopPos = Vector2.new(mousePos.X, mousePos.Y)
+            Library:Notify("TOP position enregistrée: " .. tostring(mousePos), 3)
+        end,
+        DoubleClick = false,
+        Tooltip = "Clique pour enregistrer la position HAUTE de la souris"
+    })
+
+    -- Bouton pour définir la position BOTTOM (bas)
+    autoGroupbox:AddButton({
+        Text = "Set BOTTOM Position",
+        Func = function()
+            local mousePos = UserInputService:GetMouseLocation()
+            ManualBottomPos = Vector2.new(mousePos.X, mousePos.Y)
+            Library:Notify("BOTTOM position enregistrée: " .. tostring(mousePos), 3)
+        end,
+        DoubleClick = false,
+        Tooltip = "Clique pour enregistrer la position BASSE de la souris"
+    })
+
+    -- Bouton pour reset les positions manuelles
+    autoGroupbox:AddButton({
+        Text = "Reset Positions",
+        Func = function()
+            ManualTopPos = nil
+            ManualBottomPos = nil
+            Library:Notify("Positions réinitialisées", 3)
+        end,
+        DoubleClick = false,
+        Tooltip = "Réinitialise les positions manuelles"
+    })
 
     -- Toggle pour auto-compléter les minijeux
     autoGroupbox:AddToggle("AutoForgeToggle", {

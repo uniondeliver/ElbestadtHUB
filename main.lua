@@ -106,7 +106,7 @@ local ForgeAutoGroup = MainTab:AddRightGroupbox("Auto Forge")
 
 -- Setup des modules
 MiningModule.Setup(MiningGroup, Options, Toggles)
-ForgeModule.Setup(ForgeGroup, ForgeAutoGroup, Options, Toggles)
+ForgeModule.Setup(ForgeGroup, ForgeAutoGroup, Options, Toggles, Library)
 
 -- ============================================
 -- TAB PURCHASES
