@@ -76,25 +76,34 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         local Heater = MeltMinigame:FindFirstChild("Heater")
         if not Heater or not Heater.Visible then return end
 
-        -- Utilise les positions manuelles
-        if ManualTopPos and ManualBottomPos then
-            -- Maintient le clic et bouge de haut en bas en boucle
-            VirtualInputManager:SendMouseButtonEvent(ManualTopPos.X, ManualTopPos.Y, 0, true, game, 0)
+        -- Trouve le bouton Top (bouton vert)
+        local TopButton = Heater:FindFirstChild("Top")
+        if not TopButton then return end
 
-            -- Mouvement de haut en bas
-            for y = ManualTopPos.Y, ManualBottomPos.Y, 10 do
-                VirtualInputManager:SendMouseMoveEvent(ManualTopPos.X, y, game)
-                task.wait(0.002)
-            end
+        -- Calcule la position du bouton Top
+        local topX = TopButton.AbsolutePosition.X + TopButton.AbsoluteSize.X / 2
+        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2
 
-            -- Mouvement de bas en haut
-            for y = ManualBottomPos.Y, ManualTopPos.Y, -10 do
-                VirtualInputManager:SendMouseMoveEvent(ManualTopPos.X, y, game)
-                task.wait(0.002)
-            end
+        -- Position du bas (bas du Heater)
+        local bottomY = Heater.AbsolutePosition.Y + Heater.AbsoluteSize.Y
 
-            VirtualInputManager:SendMouseButtonEvent(ManualTopPos.X, ManualTopPos.Y, 0, false, game, 0)
+        -- Clique et maintient sur le bouton Top
+        VirtualInputManager:SendMouseButtonEvent(topX, topY, 0, true, game, 0)
+
+        -- Mouvement de haut en bas (reste appuyé)
+        for y = topY, bottomY, 10 do
+            VirtualInputManager:SendMouseMoveEvent(topX, y, game)
+            task.wait(0.002)
         end
+
+        -- Mouvement de bas en haut (reste appuyé)
+        for y = bottomY, topY, -10 do
+            VirtualInputManager:SendMouseMoveEvent(topX, y, game)
+            task.wait(0.002)
+        end
+
+        -- Relâche le clic
+        VirtualInputManager:SendMouseButtonEvent(topX, topY, 0, false, game, 0)
     end
 
     -- Fonction pour automatiser le minijeu Pour
@@ -106,41 +115,28 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         local PourMinigame = ForgeGui:FindFirstChild("PourMinigame")
         if not PourMinigame or not PourMinigame.Visible then return end
 
-        -- Trouve la barre principale
-        local Bar = PourMinigame:FindFirstChild("bar") or PourMinigame:FindFirstChild("Bar")
-        if not Bar then return end
+        -- Chemin exact pour le bloc orange (Pattern)
+        local Frame = PourMinigame:FindFirstChild("Frame")
+        if not Frame then return end
 
-        -- Trouve la barre du joueur et la cible (bloc orange)
-        local PlayerBar = Bar:FindFirstChild("playerbar") or Bar:FindFirstChild("PlayerBar")
-        local TargetBar = Bar:FindFirstChild("target") or Bar:FindFirstChild("Target") or Bar:FindFirstChild("fish")
+        local Area = Frame:FindFirstChild("Area")
+        if not Area then return end
 
-        -- Si on ne trouve pas les barres, cherche dans tous les enfants
-        if not PlayerBar or not TargetBar then
-            for _, child in Bar:GetDescendants() do
-                if child:IsA("Frame") or child:IsA("ImageLabel") then
-                    -- Cherche la barre orange/target
-                    if child.BackgroundColor3 == Color3.fromRGB(255, 165, 0) or
-                       child.Name:lower():find("target") or
-                       child.Name:lower():find("orange") then
-                        TargetBar = child
-                    -- Cherche la barre du joueur
-                    elseif child.Name:lower():find("player") then
-                        PlayerBar = child
-                    end
-                end
-            end
-        end
+        local Pattern = Area:FindFirstChild("Pattern")
+        if not Pattern then return end
+
+        -- Force l'ImageLabel dans le Pattern (le bloc orange/target)
+        local TargetBar = Pattern:FindFirstChildOfClass("ImageLabel")
+
+        -- Chemin exact pour la barre du joueur (Line)
+        local Line = Frame:FindFirstChild("Line")
+        if not Line then return end
+
+        local PlayerBar = Line:FindFirstChild("ImageLabel")
 
         if PlayerBar and TargetBar then
-            -- Utilise la technique du Lerp pour suivre la cible
-            local UnfilteredTargetPosition = PlayerBar.Position:Lerp(TargetBar.Position, 0.7)
-            local TargetPosition = UDim2.fromScale(
-                math.clamp(UnfilteredTargetPosition.X.Scale, 0.15, 0.85),
-                UnfilteredTargetPosition.Y.Scale
-            )
-
-            -- Déplace directement la barre du joueur
-            PlayerBar.Position = TargetPosition
+            -- Déplace directement la barre du joueur sur le target
+            PlayerBar.Position = TargetBar.Position
         end
     end
 
