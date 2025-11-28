@@ -9,7 +9,7 @@
 -- ============================================
 
 -- URL de ton repo GitHub
-local repo = "https://raw.githubusercontent.com/uniondeliver/ElbestadtHUB/main/"
+local repo = "https://raw.githubusercontent.com/uniondeliver/ElbestadtHUB/refs/heads/master/"
 
 -- URL de la library Linoria
 local linoriaRepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
@@ -77,6 +77,7 @@ local Tabs = {
 local PlayerModule = loadstring(game:HttpGet(repo .. "player.lua" .. cacheBust))()
 local MiningModule = loadstring(game:HttpGet(repo .. "mining.lua" .. cacheBust))()
 local ForgeModule = loadstring(game:HttpGet(repo .. "forge.lua" .. cacheBust))()
+local PurchasesModule = loadstring(game:HttpGet(repo .. "purchases.lua" .. cacheBust))()
 
 -- ============================================
 -- TAB PLAYER
@@ -113,13 +114,10 @@ ForgeModule.Setup(ForgeGroup, ForgeAutoGroup, Options, Toggles)
 
 local PurchaseTab = Tabs.Purchases
 local PurchasePotions = PurchaseTab:AddLeftGroupbox("Purchases Potions")
+local PurchasePickaxes = PurchaseTab:AddRightGroupbox("Purchase Pickaxes")
 
-PurchasePotions:AddDropdown("PurchasesPotions", {
-    Text = "A dropdown",
-    Values = {"This", "is", "a", "dropdown"},
-    Default = 1,
-    Multi = false,
-})
+-- Setup du module Purchases
+PurchasesModule.Setup(PurchasePotions, PurchasePickaxes, Options, Toggles)
 
 -- ============================================
 -- UI SETTINGS TAB
@@ -149,6 +147,3 @@ SaveManager:LoadAutoloadConfig()
 -- ============================================
 
 Library:Notify("Elbestadt Hub chargé avec succès!", 5)
-
-print("[Elbestadt Hub] Tous les modules ont été chargés avec succès!")
-print("[Elbestadt Hub] Version: 1.0.0")
