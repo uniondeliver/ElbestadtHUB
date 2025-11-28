@@ -80,32 +80,42 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
 
         -- Utilise les positions manuelles si elles sont définies
         if ManualTopPos and ManualBottomPos then
-            -- Mouvement rapide de bas en haut
+            -- Commence par le haut (bouton vert) et maintient le clic
+            VirtualInputManager:SendMouseButtonEvent(ManualTopPos.X, ManualTopPos.Y, 0, true, game, 0)
+
+            -- Mouvement rapide de haut en bas (avec clic maintenu)
+            for y = ManualTopPos.Y, ManualBottomPos.Y, 5 do
+                VirtualInputManager:SendMouseMoveEvent(ManualTopPos.X, y, game)
+                task.wait(0.001)
+            end
+
+            -- Mouvement rapide de bas en haut (avec clic maintenu)
             for y = ManualBottomPos.Y, ManualTopPos.Y, -5 do
                 VirtualInputManager:SendMouseMoveEvent(ManualTopPos.X, y, game)
                 task.wait(0.001)
             end
 
-            -- Mouvement rapide de haut en bas
-            for y = ManualTopPos.Y, ManualBottomPos.Y, 5 do
-                VirtualInputManager:SendMouseMoveEvent(ManualTopPos.X, y, game)
-                task.wait(0.001)
-            end
+            -- Relâche le clic
+            VirtualInputManager:SendMouseButtonEvent(ManualTopPos.X, ManualTopPos.Y, 0, false, game, 0)
         else
             -- Fallback sur la position calculée
             local baseX = Heater.AbsolutePosition.X + Heater.AbsoluteSize.X / 2
             local topY = Heater.AbsolutePosition.Y
             local bottomY = Heater.AbsolutePosition.Y + Heater.AbsoluteSize.Y
 
-            for y = bottomY, topY, -5 do
-                VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
-                task.wait(0.001)
-            end
+            VirtualInputManager:SendMouseButtonEvent(baseX, topY, 0, true, game, 0)
 
             for y = topY, bottomY, 5 do
                 VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
                 task.wait(0.001)
             end
+
+            for y = bottomY, topY, -5 do
+                VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
+                task.wait(0.001)
+            end
+
+            VirtualInputManager:SendMouseButtonEvent(baseX, topY, 0, false, game, 0)
         end
     end
 
@@ -151,10 +161,11 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         Default = false,
         Tooltip = "Complète automatiquement les minijeux quand tu les lances",
         Callback = function(Value)
-            if Value then
+            -- Logique inversée: Value = false signifie activé
+            if not Value then
                 -- Démarre la détection automatique des minijeux
                 HeaterConnection = RunService.RenderStepped:Connect(function()
-                    if Toggles.AutoForgeToggle.Value then
+                    if not Toggles.AutoForgeToggle.Value then
                         AutoHeater()
                     end
                 end)
