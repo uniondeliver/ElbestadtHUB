@@ -1,33 +1,21 @@
--- ============================================
--- ELBESTADT HUB - Script complet en un seul fichier
--- ============================================
--- Version: 1.0.0
--- Auteur: uniondeliver
--- GitHub: https://github.com/uniondeliver/ElbestadtHUB
-
--- ============================================
--- UTILS
--- ============================================
-
-local Utils = {}
-
--- Fonction pour obtenir ton personnage (cherche dans workspace.Living)
-function Utils.GetCharacter()
-    local player = game.Players.LocalPlayer
-    return workspace.Living:FindFirstChild(player.Name)
-end
+local EncodingService = game:GetService("EncodingService")
+local RunService = game:GetService("RunService")
 
 -- Fonction pour décharger l'UI existante
-function Utils.UnloadUI()
+local function UnloadUI()
     if getgenv().Library then
+        -- Détruit la fenêtre si elle existe
         if getgenv().Library.Unload then
             getgenv().Library:Unload()
         end
+
+        -- Nettoie les variables globales
         getgenv().Library = nil
         getgenv().Options = nil
         getgenv().Toggles = nil
     end
 
+    -- Détruit tous les ScreenGuis créés par le script (au cas où)
     for _, gui in pairs(game:GetService("CoreGui"):GetChildren()) do
         if gui:IsA("ScreenGui") and (gui.Name:find("Linoria") or gui.Name:find("mspaint")) then
             gui:Destroy()
@@ -35,18 +23,15 @@ function Utils.UnloadUI()
     end
 end
 
--- Décharge l'ancienne UI
-pcall(Utils.UnloadUI)
+-- Décharge l'ancienne UI avant de charger la nouvelle
+pcall(UnloadUI)
 
--- ============================================
--- CHARGEMENT LINORIA
--- ============================================
+local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
-local linoriaRepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
-local Library = loadstring(game:HttpGet(linoriaRepo .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(linoriaRepo .. "addons/ThemeManager.lua"))()
-local SaveManager = loadstring(game:HttpGet(linoriaRepo .. "addons/SaveManager.lua"))()
-
+-- Stocke Library globalement pour pouvoir l'unload plus tard
 getgenv().Library = Library
 
 local Options = Library.Options
@@ -55,49 +40,45 @@ local Toggles = Library.Toggles
 Library.ForceCheckbox = false
 Library.ShowToggleFrameInKeybinds = true
 
--- ============================================
--- CRÉATION FENÊTRE
--- ============================================
-
 local Window = Library:CreateWindow({
-    Title = "Elbestadt Hub",
-    Footer = "version: 1.0.0",
-    Icon = 95816097006870,
-    NotifySide = "Right",
-    ShowCustomCursor = true,
+	Title = "Elbestadt Hub",
+	Footer = "version: 1.0.0",
+	Icon = 95816097006870,
+	NotifySide = "Right",
+	ShowCustomCursor = true,
 })
 
 local Tabs = {
-    Home = Window:AddTab("Home", "house"),
+	Home = Window:AddTab("Home", "house"),
     Main = Window:AddTab("Main", "menu"),
     Player = Window:AddTab("Player","user"),
     Purchases = Window:AddTab("Purchases", "dollar-sign"),
     ["UI Settings"] = Window:AddTab("UI Settings", "settings"),
 }
 
--- ============================================
--- VARIABLES GLOBALES
--- ============================================
+-- Fonction pour obtenir ton personnage
+local function GetCharacter()
+    local player = game.Players.LocalPlayer
+    return workspace.Living:FindFirstChild(player.Name)
+end
 
 local HumanModCons = {}
 local normalWalkSpeed = 16
-local normalJumpPower = 50
 
 -- ============================================
--- TAB PLAYER - MOVEMENTS
+-- TAB PLAYER
 -- ============================================
-
 local PlayerTab = Tabs.Player
 local MovementsGroup = PlayerTab:AddLeftGroupbox("Movements")
 
--- WalkSpeed Toggle
+-- Toggle pour activer le walkspeed modifier
 MovementsGroup:AddToggle("WalkspeedToggle", {
     Text = "Enable WalkSpeed",
     Default = false,
     Tooltip = "Active ou désactive la modification de vitesse",
     Callback = function(Value)
         if Value then
-            local character = Utils.GetCharacter()
+            local character = GetCharacter()
             if not character then return end
 
             local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -145,7 +126,7 @@ MovementsGroup:AddToggle("WalkspeedToggle", {
                 HumanModCons.wsCA = nil
             end
 
-            local character = Utils.GetCharacter()
+            local character = GetCharacter()
             if character then
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
@@ -156,7 +137,7 @@ MovementsGroup:AddToggle("WalkspeedToggle", {
     end
 })
 
--- WalkSpeed Slider
+-- Slider pour choisir notre Vitesse
 MovementsGroup:AddSlider("WalkspeedSlider", {
     Text = "WalkSpeed",
     Default = 16,
@@ -166,7 +147,7 @@ MovementsGroup:AddSlider("WalkspeedSlider", {
     Compact = false,
     Callback = function(Value)
         if Toggles.WalkspeedToggle.Value then
-            local character = Utils.GetCharacter()
+            local character = GetCharacter()
             if character then
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
@@ -177,14 +158,14 @@ MovementsGroup:AddSlider("WalkspeedSlider", {
     end
 })
 
--- JumpPower Toggle
+-- Toggle pour activer le jumppower modifier
 MovementsGroup:AddToggle("JumppowerToggle", {
     Text = "Enable JumpPower",
     Default = false,
     Tooltip = "Active ou désactive la modification de saut",
     Callback = function(Value)
         if Value then
-            local character = Utils.GetCharacter()
+            local character = GetCharacter()
             if not character then return end
 
             local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -232,18 +213,18 @@ MovementsGroup:AddToggle("JumppowerToggle", {
                 HumanModCons.jpCA = nil
             end
 
-            local character = Utils.GetCharacter()
+            local character = GetCharacter()
             if character then
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
-                    humanoid.JumpPower = normalJumpPower
+                    humanoid.JumpPower = 50
                 end
             end
         end
     end
 })
 
--- JumpPower Slider
+-- Slider pour choisir le JumpPower
 MovementsGroup:AddSlider("JumppowerSlider", {
     Text = "JumpPower",
     Default = 50,
@@ -253,7 +234,7 @@ MovementsGroup:AddSlider("JumppowerSlider", {
     Compact = false,
     Callback = function(Value)
         if Toggles.JumppowerToggle.Value then
-            local character = Utils.GetCharacter()
+            local character = GetCharacter()
             if character then
                 local humanoid = character:FindFirstChildOfClass("Humanoid")
                 if humanoid then
@@ -265,13 +246,12 @@ MovementsGroup:AddSlider("JumppowerSlider", {
 })
 
 -- ============================================
--- TAB MAIN - FORGE
+-- TAB MAIN
 -- ============================================
-
 local MainTab = Tabs.Main
 local ForgeGroup = MainTab:AddLeftGroupbox("Forge")
 
--- Open Forge Button
+-- Bouton pour ouvrir la forge de n'importe où
 ForgeGroup:AddButton({
     Text = "Open Forge",
     Func = function()
@@ -289,7 +269,7 @@ ForgeGroup:AddButton({
     Tooltip = "Ouvre la forge de n'importe où"
 })
 
--- Open Marbles Button
+-- Bouton pour ouvrir le menu de Marbles
 ForgeGroup:AddButton({
     Text = "Open Marbles (seller)",
     Func = function()
@@ -307,70 +287,23 @@ ForgeGroup:AddButton({
     Tooltip = "Vendre de n'importe où"
 })
 
--- ============================================
--- TAB MAIN - MINING
--- ============================================
-
 local MiningGroup = MainTab:AddRightGroupbox("Auto Mining")
-
--- Auto Mine Toggle
-MiningGroup:AddToggle("AutoMineToggle", {
-    Text = "Enable Auto Mine",
-    Default = false,
-    Tooltip = "Active ou désactive le minage automatique",
-    Callback = function(Value)
-        if Value then
-            print("[Mining] Auto mine activé")
-        else
-            print("[Mining] Auto mine désactivé")
-        end
-    end
-})
-
--- Teleport to Rock Toggle
-MiningGroup:AddToggle("TeleportToRockToggle", {
-    Text = "Teleport to Rock",
-    Default = false,
-    Tooltip = "Se téléporte automatiquement au rocher le plus proche",
-    Callback = function(Value)
-        if Value then
-            print("[Mining] Teleport to rock activé")
-        else
-            print("[Mining] Teleport to rock désactivé")
-        end
-    end
-})
-
--- Ore Type Selection
-MiningGroup:AddDropdown("OreTypeSelection", {
-    Values = {"All", "Iron", "Gold", "Diamond", "Emerald"},
-    Default = 1,
-    Multi = false,
-    Text = "Select Ore Type",
-    Tooltip = "Choisis le type de minerai à miner"
-})
-
--- ============================================
--- TAB MAIN - AUTO FORGE
--- ============================================
 
 local ForgeAutoGroup = MainTab:AddRightGroupbox("Auto Forge")
 
--- Auto Forge Toggle
+-- Toggle pour auto-forge
 ForgeAutoGroup:AddToggle("AutoForgeToggle", {
     Text = "Enable Auto Forge",
     Default = false,
     Tooltip = "Automatise le processus de forge",
     Callback = function(Value)
         if Value then
-            print("[Forge] Auto forge activé")
-        else
-            print("[Forge] Auto forge désactivé")
+            -- TODO: Logique d'auto forge
         end
     end
 })
 
--- Ore Selection for Auto Forge
+-- Dropdown pour choisir le minerai à forger
 ForgeAutoGroup:AddDropdown("OreSelection", {
     Values = {"Iron", "Gold", "Diamond", "Emerald"},
     Default = 1,
@@ -379,18 +312,84 @@ ForgeAutoGroup:AddDropdown("OreSelection", {
     Tooltip = "Choisis le minerai à forger"
 })
 
--- ============================================
--- TAB PURCHASES
--- ============================================
-
+---------------------------------------------------------------------------------------
+-----------------------------PURCHASES----------------------------------------------------------
+---------------------------------------------------------------------------------------
 local PurchaseTab = Tabs.Purchases
 local PurchasePotions = PurchaseTab:AddLeftGroupbox("Purchases Potions")
 
-PurchasePotions:AddDropdown("PurchasesPotions", {
-    Text = "A dropdown",
-    Values = {"This", "is", "a", "dropdown"},
-    Default = 1,
-    Multi = false,
+PurchasePotions:AddButton("" , {
+    Text = "Damage Potion I   250 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+PurchasePotions:AddButton("" , {
+    Text = "Health Potion I   150 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+PurchasePotions:AddButton("" , {
+    Text = "Miner Potion I   500 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+PurchasePotions:AddButton("" , {
+    Text = "Luck Potion I   350 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+PurchasePotions:AddButton("" , {
+    Text = "Speed Potion I   200 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+local PurchasePickaxes = PurchaseTab:AddRightGroupbox("Purchase Pickaxes")
+
+PurchasePickaxes:AddButton("", {
+    Text = "Bronze Pickaxe   150 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+PurchasePickaxes:AddButton("", {
+    Text = "Iron Pickaxe  500 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+PurchasePickaxes:AddButton("", {
+    Text = "Gold Pickaxe  1500 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
+})
+
+PurchasePickaxes:AddButton("", {
+    Text = "Platinium Pickaxe  5.000 $",
+	Func = function()
+		print("You clicked a sub button!")
+	end,
+	DoubleClick = true,
 })
 
 -- ============================================
@@ -407,12 +406,3 @@ SaveManager:BuildConfigSection(Tabs["UI Settings"])
 ThemeManager:ApplyToTab(Tabs["UI Settings"])
 
 SaveManager:LoadAutoloadConfig()
-
--- ============================================
--- NOTIFICATION
--- ============================================
-
-Library:Notify("Elbestadt Hub chargé avec succès!", 5)
-
-print("[Elbestadt Hub] Script chargé!")
-print("[Elbestadt Hub] Version: 1.0.0")
