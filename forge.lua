@@ -88,30 +88,30 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
 
         -- Position du bouton Top (ajusté 8px plus bas)
         local centerX = TopButton.AbsolutePosition.X + TopButton.AbsoluteSize.X / 2
-        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2 + 8
+        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2 + 50
 
         local dragDistance = 150
 
         -- Clique et maintient sur Top
         VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, true, game, 0)
-        task.wait(0.05)
+        task.wait(0.1)
 
         -- Drag lent vers le bas
         for y = topY, topY + dragDistance, 5 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.02)
+            task.wait(0.1)
         end
 
         -- Drag lent vers le haut
         for y = topY + dragDistance, topY - dragDistance, -5 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.02)
+            task.wait(0.1)
         end
 
         -- Retour au centre
         for y = topY - dragDistance, topY, 5 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.02)
+            task.wait(0.1)
         end
 
         -- Relâche
