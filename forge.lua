@@ -53,28 +53,64 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles)
     -- AUTO FORGE
     -- ============================================
 
-    -- Toggle pour auto-forge
+    -- Variables pour l'auto forge
+    local HeaterConnection = nil
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    local RunService = game:GetService("RunService")
+    local Players = game:GetService("Players")
+
+    -- Fonction pour automatiser le minijeu Heater
+    local function AutoHeater()
+        local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+        local ForgeGui = PlayerGui:FindFirstChild("Forge")
+
+        if not ForgeGui then return end
+
+        local MeltMinigame = ForgeGui:FindFirstChild("MeltMinigame")
+        if not MeltMinigame or not MeltMinigame.Visible then return end
+
+        local Heater = MeltMinigame:FindFirstChild("Heater")
+        if not Heater or not Heater.Visible then return end
+
+        -- Simule mouvement souris bas vers haut rapidement
+        local baseX = Heater.AbsolutePosition.X + Heater.AbsoluteSize.X / 2
+        local topY = Heater.AbsolutePosition.Y
+        local bottomY = Heater.AbsolutePosition.Y + Heater.AbsoluteSize.Y
+
+        -- Mouvement rapide de bas en haut
+        for y = bottomY, topY, -5 do
+            VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
+            task.wait(0.001)
+        end
+
+        -- Mouvement rapide de haut en bas
+        for y = topY, bottomY, 5 do
+            VirtualInputManager:SendMouseMoveEvent(baseX, y, game)
+            task.wait(0.001)
+        end
+    end
+
+    -- Toggle pour auto-compléter les minijeux
     autoGroupbox:AddToggle("AutoForgeToggle", {
-        Text = "Enable Auto Forge",
+        Text = "Auto Complete Minigames",
         Default = false,
-        Tooltip = "Automatise le processus de forge",
+        Tooltip = "Complète automatiquement les minijeux quand tu les lances",
         Callback = function(Value)
             if Value then
-                -- TODO: Logique d'auto forge
-                print("[Forge] Auto forge activé")
+                -- Démarre la détection automatique des minijeux
+                HeaterConnection = RunService.RenderStepped:Connect(function()
+                    if Toggles.AutoForgeToggle.Value then
+                        AutoHeater()
+                    end
+                end)
             else
-                print("[Forge] Auto forge désactivé")
+                -- Arrête la détection
+                if HeaterConnection then
+                    HeaterConnection:Disconnect()
+                    HeaterConnection = nil
+                end
             end
         end
-    })
-
-    -- Dropdown pour choisir le minerai à forger
-    autoGroupbox:AddDropdown("OreSelection", {
-        Values = {"Iron", "Gold", "Diamond", "Emerald"},
-        Default = 1,
-        Multi = false,
-        Text = "Select Ore",
-        Tooltip = "Choisis le minerai à forger"
     })
 end
 
