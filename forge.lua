@@ -161,7 +161,7 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     -- UI CONTROLS
     -- ============================================
 
-    autoGroupbox:AddToggle("AutoForgeToggle", {
+    local AutoForgeToggle = autoGroupbox:AddToggle("AutoForgeToggle", {
         Text = "Auto Complete Minigames",
         Default = false,
         Tooltip = "Complète automatiquement les minijeux",
@@ -181,6 +181,13 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
                 end
             end
         end
+    })
+
+    AutoForgeToggle:AddKeyPicker("AutoForgeKeybind", {
+        Text = "Auto Forge",
+        Default = "F",
+        Mode = "Toggle",
+        SyncToggleState = true
     })
 end
 
