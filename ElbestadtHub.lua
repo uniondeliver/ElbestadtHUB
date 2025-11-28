@@ -321,7 +321,7 @@ local PurchasePotions = PurchaseTab:AddLeftGroupbox("Purchases Potions")
 PurchasePotions:AddButton("" , {
     Text = "Damage Potion I   250 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Damage Potion I
 	end,
 	DoubleClick = true,
 })
@@ -329,7 +329,7 @@ PurchasePotions:AddButton("" , {
 PurchasePotions:AddButton("" , {
     Text = "Health Potion I   150 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Health Potion I
 	end,
 	DoubleClick = true,
 })
@@ -337,7 +337,7 @@ PurchasePotions:AddButton("" , {
 PurchasePotions:AddButton("" , {
     Text = "Miner Potion I   500 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Miner Potion I
 	end,
 	DoubleClick = true,
 })
@@ -345,7 +345,7 @@ PurchasePotions:AddButton("" , {
 PurchasePotions:AddButton("" , {
     Text = "Luck Potion I   350 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Luck Potion I
 	end,
 	DoubleClick = true,
 })
@@ -353,7 +353,7 @@ PurchasePotions:AddButton("" , {
 PurchasePotions:AddButton("" , {
     Text = "Speed Potion I   200 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Speed Potion I
 	end,
 	DoubleClick = true,
 })
@@ -363,7 +363,7 @@ local PurchasePickaxes = PurchaseTab:AddRightGroupbox("Purchase Pickaxes")
 PurchasePickaxes:AddButton("", {
     Text = "Bronze Pickaxe   150 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Bronze Pickaxe
 	end,
 	DoubleClick = true,
 })
@@ -371,7 +371,7 @@ PurchasePickaxes:AddButton("", {
 PurchasePickaxes:AddButton("", {
     Text = "Iron Pickaxe  500 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Iron Pickaxe
 	end,
 	DoubleClick = true,
 })
@@ -379,7 +379,7 @@ PurchasePickaxes:AddButton("", {
 PurchasePickaxes:AddButton("", {
     Text = "Gold Pickaxe  1500 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Gold Pickaxe
 	end,
 	DoubleClick = true,
 })
@@ -387,7 +387,7 @@ PurchasePickaxes:AddButton("", {
 PurchasePickaxes:AddButton("", {
     Text = "Platinium Pickaxe  5.000 $",
 	Func = function()
-		print("You clicked a sub button!")
+		-- TODO: Acheter Platinium Pickaxe
 	end,
 	DoubleClick = true,
 })
