@@ -4,9 +4,8 @@
 
 local MiningModule = {}
 
--- Charge les utils depuis GitHub
-local repo = "https://raw.githubusercontent.com/uniondeliver/ElbestadtHUB/main/"
-local Utils = loadstring(game:HttpGet(repo .. "utils.lua"))()
+-- Récupère Utils depuis getgenv (chargé dans main.lua)
+local Utils = getgenv().Utils
 
 -- Setup du module Mining
 function MiningModule.Setup(groupbox, Options, Toggles)

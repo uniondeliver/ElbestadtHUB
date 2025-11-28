@@ -20,6 +20,9 @@ local linoriaRepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/ma
 
 local Utils = loadstring(game:HttpGet(repo .. "utils.lua"))()
 
+-- Stocke Utils globalement pour que tous les modules y aient accès
+getgenv().Utils = Utils
+
 -- Décharge l'ancienne UI avant de charger la nouvelle
 pcall(Utils.UnloadUI)
 

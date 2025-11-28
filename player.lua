@@ -4,14 +4,13 @@
 
 local PlayerModule = {}
 
+-- Récupère Utils depuis getgenv (chargé dans main.lua)
+local Utils = getgenv().Utils
+
 -- Table pour stocker les connections
 local HumanModCons = {}
 local normalWalkSpeed = 16
 local normalJumpPower = 50
-
--- Charge les utils depuis GitHub
-local repo = "https://raw.githubusercontent.com/uniondeliver/ElbestadtHUB/main/"
-local Utils = loadstring(game:HttpGet(repo .. "utils.lua"))()
 
 -- Setup du module Player (WalkSpeed & JumpPower)
 function PlayerModule.Setup(groupbox, Options, Toggles)
