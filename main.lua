@@ -143,7 +143,19 @@ ThemeManager:ApplyToTab(Tabs["UI Settings"])
 SaveManager:LoadAutoloadConfig()
 
 -- ============================================
+-- KEYBIND POUR TOGGLE L'UI
+-- ============================================
+
+Library:OnUnload(function()
+    print("[Elbestadt Hub] UI déchargée")
+end)
+
+-- Ajoute une keybind pour toggle l'UI (RightShift par défaut)
+Library.ToggleKeybind = Options.MenuKeybind or Enum.KeyCode.RightShift
+
+-- ============================================
 -- NOTIFICATION DE CHARGEMENT
 -- ============================================
 
 Library:Notify("Elbestadt Hub chargé avec succès!", 5)
+Library:Notify("Appuie sur RightShift pour toggle l'UI", 5)
