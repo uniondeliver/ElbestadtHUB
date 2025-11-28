@@ -4,9 +4,6 @@
 
 local PlayerModule = {}
 
--- Récupère Utils depuis getgenv (chargé dans main.lua)
-local Utils = getgenv().Utils
-
 -- Table pour stocker les connections
 local HumanModCons = {}
 local normalWalkSpeed = 16
@@ -14,6 +11,8 @@ local normalJumpPower = 50
 
 -- Setup du module Player (WalkSpeed & JumpPower)
 function PlayerModule.Setup(groupbox, Options, Toggles)
+    -- Récupère Utils depuis getgenv (chargé dans main.lua)
+    local Utils = getgenv().Utils
 
     -- ============================================
     -- WALKSPEED

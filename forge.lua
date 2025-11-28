@@ -4,11 +4,10 @@
 
 local ForgeModule = {}
 
--- Récupère Utils depuis getgenv (chargé dans main.lua)
-local Utils = getgenv().Utils
-
 -- Setup du module Forge
 function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles)
+    -- Récupère Utils depuis getgenv (chargé dans main.lua)
+    local Utils = getgenv().Utils
 
     -- ============================================
     -- FORGE BUTTONS
