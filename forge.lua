@@ -100,24 +100,24 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
 
         -- Clique et maintient sur Top
         VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, true, game, 0)
-        task.wait(0.05)
+        task.wait(0.03)
 
-        -- Drag lent vers le bas
-        for y = topY, topY + dragDistance, 5 do
+        -- Drag rapide vers le bas
+        for y = topY, topY + dragDistance, 10 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.02)
+            task.wait(0.005)
         end
 
-        -- Drag lent vers le haut
-        for y = topY + dragDistance, topY - dragDistance, -5 do
+        -- Drag rapide vers le haut
+        for y = topY + dragDistance, topY - dragDistance, -10 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.02)
+            task.wait(0.005)
         end
 
         -- Retour au centre
-        for y = topY - dragDistance, topY, 5 do
+        for y = topY - dragDistance, topY, 10 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.02)
+            task.wait(0.005)
         end
 
         -- Relâche
