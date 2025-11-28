@@ -14,11 +14,14 @@ local repo = "https://raw.githubusercontent.com/uniondeliver/ElbestadtHUB/main/"
 -- URL de la library Linoria
 local linoriaRepo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 
+-- Cache busting pour forcer le rechargement
+local cacheBust = "?v=" .. tostring(os.time())
+
 -- ============================================
 -- CHARGEMENT DES UTILS
 -- ============================================
 
-local Utils = loadstring(game:HttpGet(repo .. "utils.lua"))()
+local Utils = loadstring(game:HttpGet(repo .. "utils.lua" .. cacheBust))()
 
 -- Stocke Utils globalement pour que tous les modules y aient accès
 getgenv().Utils = Utils
@@ -71,9 +74,9 @@ local Tabs = {
 -- CHARGEMENT DES MODULES
 -- ============================================
 
-local PlayerModule = loadstring(game:HttpGet(repo .. "player.lua"))()
-local MiningModule = loadstring(game:HttpGet(repo .. "mining.lua"))()
-local ForgeModule = loadstring(game:HttpGet(repo .. "forge.lua"))()
+local PlayerModule = loadstring(game:HttpGet(repo .. "player.lua" .. cacheBust))()
+local MiningModule = loadstring(game:HttpGet(repo .. "mining.lua" .. cacheBust))()
+local ForgeModule = loadstring(game:HttpGet(repo .. "forge.lua" .. cacheBust))()
 
 -- ============================================
 -- TAB PLAYER
