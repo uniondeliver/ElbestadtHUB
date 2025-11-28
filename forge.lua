@@ -13,6 +13,8 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
     local MinigameConnection = nil
+    local MeltInProgress = false
+    local HammerInProgress = false
 
     -- ============================================
     -- HELPER FUNCTIONS
@@ -74,6 +76,8 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     -- ============================================
 
     local function AutoMelt()
+        if MeltInProgress then return end
+
         local ForgeGui = getForgeGui()
         if not ForgeGui then return end
 
@@ -86,6 +90,8 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         local TopButton = Heater:FindFirstChild("Top")
         if not TopButton then return end
 
+        MeltInProgress = true
+
         -- Position du bouton Top (ajusté 8px plus bas)
         local centerX = TopButton.AbsolutePosition.X + TopButton.AbsoluteSize.X / 2
         local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2 + 50
@@ -94,28 +100,30 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
 
         -- Clique et maintient sur Top
         VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, true, game, 0)
-        task.wait(0.1)
+        task.wait(0.05)
 
         -- Drag lent vers le bas
         for y = topY, topY + dragDistance, 5 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.1)
+            task.wait(0.02)
         end
 
         -- Drag lent vers le haut
         for y = topY + dragDistance, topY - dragDistance, -5 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.1)
+            task.wait(0.02)
         end
 
         -- Retour au centre
         for y = topY - dragDistance, topY, 5 do
             VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-            task.wait(0.1)
+            task.wait(0.02)
         end
 
         -- Relâche
         VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, false, game, 0)
+
+        MeltInProgress = false
     end
 
     local function AutoPour()
@@ -144,17 +152,24 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     end
 
     local function AutoHammer()
+        if HammerInProgress then return end
+
         local ForgeGui = getForgeGui()
         if not ForgeGui then return end
 
         local HammerMinigame = ForgeGui:FindFirstChild("HammerMinigame")
         if not HammerMinigame or not HammerMinigame.Visible then return end
 
+        HammerInProgress = true
+
         local ClickArea = HammerMinigame:FindFirstChild("ClickArea") or HammerMinigame
         local posX = ClickArea.AbsolutePosition.X + ClickArea.AbsoluteSize.X / 2
         local posY = ClickArea.AbsolutePosition.Y + ClickArea.AbsoluteSize.Y / 2
 
         simulateClick(posX, posY)
+
+        task.wait(0.05)
+        HammerInProgress = false
     end
 
     -- ============================================
@@ -168,17 +183,18 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         Callback = function(Value)
             if Value then
                 MinigameConnection = RunService.RenderStepped:Connect(function()
-                    if Toggles.AutoForgeToggle.Value then
-                        AutoMelt()
-                        AutoPour()
-                        AutoHammer()
-                    end
+                    AutoMelt()
+                    AutoPour()
+                    AutoHammer()
                 end)
             else
                 if MinigameConnection then
                     MinigameConnection:Disconnect()
                     MinigameConnection = nil
                 end
+                -- Reset les flags
+                MeltInProgress = false
+                HammerInProgress = false
             end
         end
     })
