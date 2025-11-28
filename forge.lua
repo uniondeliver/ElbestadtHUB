@@ -86,10 +86,10 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         local TopButton = Heater:FindFirstChild("Top")
         if not TopButton then return end
 
-        -- Position du bouton Top
+        -- Position du bouton Top (ajusté 8px plus bas)
         local centerX = TopButton.AbsolutePosition.X + TopButton.AbsoluteSize.X / 2
-        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2
-        
+        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2 + 8
+
         local dragDistance = 150
 
         -- Clique et maintient sur Top
