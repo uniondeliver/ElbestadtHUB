@@ -14,6 +14,7 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
 
     local MinigameConnection = nil
     local MeltInProgress = false
+    local PourInProgress = false
     local HammerInProgress = false
 
     -- ============================================
@@ -72,7 +73,7 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     })
 
     -- ============================================
-    -- AUTO MINIGAMES
+    -- AUTO MINIGAMES (INSTANT SKIP)
     -- ============================================
 
     local function AutoMelt()
@@ -84,68 +85,37 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         local MeltMinigame = ForgeGui:FindFirstChild("MeltMinigame")
         if not MeltMinigame or not MeltMinigame.Visible then return end
 
-        local Heater = MeltMinigame:FindFirstChild("Heater")
-        if not Heater or not Heater.Visible then return end
-
-        local TopButton = Heater:FindFirstChild("Top")
-        if not TopButton then return end
-
         MeltInProgress = true
 
-        -- Position du bouton Top (ajusté 8px plus bas)
-        local centerX = TopButton.AbsolutePosition.X + TopButton.AbsoluteSize.X / 2
-        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2 + 8
+        -- Skip instantanément vers Pour
+        pcall(function()
+            local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
+            ChangeSequence:InvokeServer("Pour")
+        end)
 
-        local dragDistance = 150
-
-        -- Clique et maintient sur Top
-        VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, true, game, 0)
-        task.wait(0.03)
-
-        -- Pattern: Top → Bas → Top → Bas → Top → Bas (3 cycles)
-        for i = 1, 3 do
-            -- Vers le bas
-            for y = topY, topY + dragDistance, 10 do
-                VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-                task.wait(0.005)
-            end
-
-            -- Retour vers le haut (top)
-            for y = topY + dragDistance, topY, -10 do
-                VirtualInputManager:SendMouseMoveEvent(centerX, y, game)
-                task.wait(0.005)
-            end
-        end
-
-        -- Relâche
-        VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, false, game, 0)
-
+        task.wait(0.2)
         MeltInProgress = false
     end
 
     local function AutoPour()
+        if PourInProgress then return end
+
         local ForgeGui = getForgeGui()
         if not ForgeGui then return end
 
         local PourMinigame = ForgeGui:FindFirstChild("PourMinigame")
         if not PourMinigame or not PourMinigame.Visible then return end
 
-        local Frame = PourMinigame:FindFirstChild("Frame")
-        if not Frame then return end
+        PourInProgress = true
 
-        local Area = Frame:FindFirstChild("Area")
-        local Line = Frame:FindFirstChild("Line")
-        if not Area or not Line then return end
+        -- Skip instantanément vers Hammer
+        pcall(function()
+            local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
+            ChangeSequence:InvokeServer("Hammer")
+        end)
 
-        local Pattern = Area:FindFirstChild("Pattern")
-        if not Pattern then return end
-
-        local TargetBar = Pattern:FindFirstChildOfClass("ImageLabel")
-        local PlayerBar = Line:FindFirstChildOfClass("ImageLabel")
-
-        if PlayerBar and TargetBar then
-            PlayerBar.Position = TargetBar.Position
-        end
+        task.wait(0.2)
+        PourInProgress = false
     end
 
     local function AutoHammer()
@@ -191,6 +161,7 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
                 end
                 -- Reset les flags
                 MeltInProgress = false
+                PourInProgress = false
                 HammerInProgress = false
             end
         end
