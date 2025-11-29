@@ -85,9 +85,32 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         local MeltMinigame = ForgeGui:FindFirstChild("MeltMinigame")
         if not MeltMinigame or not MeltMinigame.Visible then return end
 
+        local Heater = MeltMinigame:FindFirstChild("Heater")
+        if not Heater or not Heater.Visible then return end
+
+        local TopButton = Heater:FindFirstChild("Top")
+        if not TopButton then return end
+
         MeltInProgress = true
 
-        -- Skip instantanément vers Pour
+        -- Faire un petit mouvement rapide
+        local centerX = TopButton.AbsolutePosition.X + TopButton.AbsoluteSize.X / 2
+        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2 + 8
+
+        -- Click rapide
+        VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, true, game, 0)
+        task.wait(0.05)
+
+        -- Un petit drag rapide
+        VirtualInputManager:SendMouseMoveEvent(centerX, topY + 50, game)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseMoveEvent(centerX, topY, game)
+        task.wait(0.05)
+
+        VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, false, game, 0)
+
+        -- Puis skip vers Pour
+        task.wait(0.1)
         pcall(function()
             local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
             ChangeSequence:InvokeServer("Pour", {
