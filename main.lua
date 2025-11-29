@@ -66,6 +66,7 @@ local Tabs = {
     Home = Window:AddTab("Home", "house"),
     Main = Window:AddTab("Main", "menu"),
     Player = Window:AddTab("Player","user"),
+    Visuals = Window:AddTab("Visuals", "eye"),
     Purchases = Window:AddTab("Purchases", "dollar-sign"),
     ["UI Settings"] = Window:AddTab("UI Settings", "settings"),
 }
@@ -78,6 +79,7 @@ local PlayerModule = loadstring(game:HttpGet(repo .. "player.lua" .. cacheBust))
 local MiningModule = loadstring(game:HttpGet(repo .. "mining.lua" .. cacheBust))()
 local ForgeModule = loadstring(game:HttpGet(repo .. "forge.lua" .. cacheBust))()
 local PurchasesModule = loadstring(game:HttpGet(repo .. "purchases.lua" .. cacheBust))()
+local ESPModule = loadstring(game:HttpGet(repo .. "esp.lua" .. cacheBust))()
 
 -- ============================================
 -- TAB PLAYER
@@ -118,6 +120,16 @@ local PurchasePickaxes = PurchaseTab:AddRightGroupbox("Purchase Pickaxes")
 
 -- Setup du module Purchases
 PurchasesModule.Setup(PurchasePotions, PurchasePickaxes, Options, Toggles)
+
+-- ============================================
+-- TAB VISUALS
+-- ============================================
+
+local VisualsTab = Tabs.Visuals
+local ESPGroup = VisualsTab:AddLeftGroupbox("ESP")
+
+-- Setup du module ESP
+ESPModule.Setup(ESPGroup, Options, Toggles, Library)
 
 -- ============================================
 -- UI SETTINGS TAB
