@@ -71,78 +71,62 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     })
 
     -- ============================================
-    -- AUTO MINIGAMES (HOOK METHOD)
+    -- AUTO MINIGAMES
     -- ============================================
 
-    local ChangeSequenceRemote = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
-    getgenv().ForgeSkipNext = nil
+    local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
 
-    -- Hook namecall pour remplacer les arguments
-    local namecall
-    namecall = hookmetamethod(game, "__namecall", function(self, ...)
-        local args = {...}
-        local method = getnamecallmethod():lower()
-
-        if self == ChangeSequenceRemote and method == "invokeserver" then
-            -- Remplacer le premier argument si on a un skip en attente
-            args[1] = getgenv().ForgeSkipNext or args[1]
-            return namecall(self, unpack(args))
-        end
-
-        return namecall(self, ...)
-    end)
-
-    -- Détection des minigames et préparation du skip
-    local lastMeltCheck = 0
-    local lastPourCheck = 0
-    local lastHammerCheck = 0
+    local MeltSkipped = false
+    local PourSkipped = false
 
     local function AutoForge()
         if not AutoForgeEnabled then return end
 
         local ForgeGui = getForgeGui()
         if not ForgeGui then
-            getgenv().ForgeSkipNext = nil
+            MeltSkipped = false
+            PourSkipped = false
             return
         end
 
-        local currentTime = tick()
-
-        -- AUTO MELT: Prépare "Pour" comme prochain argument
+        -- AUTO MELT
         local MeltMinigame = ForgeGui:FindFirstChild("MeltMinigame")
         if MeltMinigame and MeltMinigame.Visible then
-            if currentTime - lastMeltCheck > 0.5 then
-                lastMeltCheck = currentTime
-                getgenv().ForgeSkipNext = "Pour"
+            if not MeltSkipped then
+                MeltSkipped = true
+                task.wait(0.1)
+                pcall(function()
+                    ChangeSequence:InvokeServer("Pour", {ClientTime = tick()})
+                end)
             end
             return
+        else
+            MeltSkipped = false
         end
 
-        -- AUTO POUR: Prépare "Hammer" comme prochain argument
+        -- AUTO POUR
         local PourMinigame = ForgeGui:FindFirstChild("PourMinigame")
         if PourMinigame and PourMinigame.Visible then
-            if currentTime - lastPourCheck > 0.5 then
-                lastPourCheck = currentTime
-                getgenv().ForgeSkipNext = "Hammer"
+            if not PourSkipped then
+                PourSkipped = true
+                task.wait(0.1)
+                pcall(function()
+                    ChangeSequence:InvokeServer("Hammer", {ClientTime = tick()})
+                end)
             end
             return
+        else
+            PourSkipped = false
         end
 
-        -- AUTO HAMMER: Click rapide
+        -- AUTO HAMMER
         local HammerMinigame = ForgeGui:FindFirstChild("HammerMinigame")
         if HammerMinigame and HammerMinigame.Visible then
-            if currentTime - lastHammerCheck > 0.1 then
-                lastHammerCheck = currentTime
-                local ClickArea = HammerMinigame:FindFirstChild("ClickArea") or HammerMinigame
-                local posX = ClickArea.AbsolutePosition.X + ClickArea.AbsoluteSize.X / 2
-                local posY = ClickArea.AbsolutePosition.Y + ClickArea.AbsoluteSize.Y / 2
-                simulateClick(posX, posY)
-            end
-            return
+            local ClickArea = HammerMinigame:FindFirstChild("ClickArea") or HammerMinigame
+            local posX = ClickArea.AbsolutePosition.X + ClickArea.AbsoluteSize.X / 2
+            local posY = ClickArea.AbsolutePosition.Y + ClickArea.AbsoluteSize.Y / 2
+            simulateClick(posX, posY)
         end
-
-        -- Aucun minigame visible, reset le skip
-        getgenv().ForgeSkipNext = nil
     end
 
     -- ============================================
@@ -163,11 +147,8 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
                     MinigameConnection:Disconnect()
                     MinigameConnection = nil
                 end
-                -- Reset tout
-                getgenv().ForgeSkipNext = nil
-                lastMeltCheck = 0
-                lastPourCheck = 0
-                lastHammerCheck = 0
+                MeltSkipped = false
+                PourSkipped = false
             end
         end
     })
