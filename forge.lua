@@ -13,9 +13,7 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
     local MinigameConnection = nil
-    local MeltInProgress = false
-    local PourInProgress = false
-    local HammerInProgress = false
+    local AutoForgeEnabled = false
 
     -- ============================================
     -- HELPER FUNCTIONS
@@ -73,97 +71,80 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
     })
 
     -- ============================================
-    -- AUTO MINIGAMES (INSTANT SKIP)
+    -- AUTO MINIGAMES (HOOK METHOD)
     -- ============================================
 
-    local function AutoMelt()
-        if MeltInProgress then return end
+    local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
+
+    -- Hook setupé une seule fois
+    local OldNamecall
+    OldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
+
+        if AutoForgeEnabled and method == "FireServer" or method == "InvokeServer" then
+            if self == ChangeSequence then
+                -- Laisser passer normalement
+                return OldNamecall(self, ...)
+            end
+        end
+
+        return OldNamecall(self, ...)
+    end)
+
+    -- Détection et skip automatique des minigames
+    local lastMeltSkip = 0
+    local lastPourSkip = 0
+    local lastHammerClick = 0
+
+    local function AutoForge()
+        if not AutoForgeEnabled then return end
 
         local ForgeGui = getForgeGui()
         if not ForgeGui then return end
 
+        local currentTime = tick()
+
+        -- AUTO MELT: Skip vers Pour
         local MeltMinigame = ForgeGui:FindFirstChild("MeltMinigame")
-        if not MeltMinigame or not MeltMinigame.Visible then return end
+        if MeltMinigame and MeltMinigame.Visible then
+            if currentTime - lastMeltSkip > 1 then -- Cooldown de 1 seconde
+                lastMeltSkip = currentTime
+                task.spawn(function()
+                    pcall(function()
+                        ChangeSequence:InvokeServer("Pour", {ClientTime = tick()})
+                    end)
+                end)
+            end
+            return
+        end
 
-        local Heater = MeltMinigame:FindFirstChild("Heater")
-        if not Heater or not Heater.Visible then return end
-
-        local TopButton = Heater:FindFirstChild("Top")
-        if not TopButton then return end
-
-        MeltInProgress = true
-
-        -- Faire un petit mouvement rapide
-        local centerX = TopButton.AbsolutePosition.X + TopButton.AbsoluteSize.X / 2
-        local topY = TopButton.AbsolutePosition.Y + TopButton.AbsoluteSize.Y / 2 + 8
-
-        -- Click rapide
-        VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, true, game, 0)
-        task.wait(0.05)
-
-        -- Un petit drag rapide
-        VirtualInputManager:SendMouseMoveEvent(centerX, topY + 50, game)
-        task.wait(0.05)
-        VirtualInputManager:SendMouseMoveEvent(centerX, topY, game)
-        task.wait(0.05)
-
-        VirtualInputManager:SendMouseButtonEvent(centerX, topY, 0, false, game, 0)
-
-        -- Puis skip vers Pour
-        task.wait(0.1)
-        pcall(function()
-            local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
-            ChangeSequence:InvokeServer("Pour", {
-                ClientTime = tick()
-            })
-        end)
-
-        task.wait(0.2)
-        MeltInProgress = false
-    end
-
-    local function AutoPour()
-        if PourInProgress then return end
-
-        local ForgeGui = getForgeGui()
-        if not ForgeGui then return end
-
+        -- AUTO POUR: Skip vers Hammer
         local PourMinigame = ForgeGui:FindFirstChild("PourMinigame")
-        if not PourMinigame or not PourMinigame.Visible then return end
+        if PourMinigame and PourMinigame.Visible then
+            if currentTime - lastPourSkip > 1 then -- Cooldown de 1 seconde
+                lastPourSkip = currentTime
+                task.spawn(function()
+                    pcall(function()
+                        ChangeSequence:InvokeServer("Hammer", {ClientTime = tick()})
+                    end)
+                end)
+            end
+            return
+        end
 
-        PourInProgress = true
-
-        -- Skip instantanément vers Hammer
-        pcall(function()
-            local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
-            ChangeSequence:InvokeServer("Hammer", {
-                ClientTime = tick()
-            })
-        end)
-
-        task.wait(0.2)
-        PourInProgress = false
-    end
-
-    local function AutoHammer()
-        if HammerInProgress then return end
-
-        local ForgeGui = getForgeGui()
-        if not ForgeGui then return end
-
+        -- AUTO HAMMER: Click rapide
         local HammerMinigame = ForgeGui:FindFirstChild("HammerMinigame")
-        if not HammerMinigame or not HammerMinigame.Visible then return end
-
-        HammerInProgress = true
-
-        local ClickArea = HammerMinigame:FindFirstChild("ClickArea") or HammerMinigame
-        local posX = ClickArea.AbsolutePosition.X + ClickArea.AbsoluteSize.X / 2
-        local posY = ClickArea.AbsolutePosition.Y + ClickArea.AbsoluteSize.Y / 2
-
-        simulateClick(posX, posY)
-
-        task.wait(0.05)
-        HammerInProgress = false
+        if HammerMinigame and HammerMinigame.Visible then
+            if currentTime - lastHammerClick > 0.1 then -- Cooldown de 0.1 seconde
+                lastHammerClick = currentTime
+                local ClickArea = HammerMinigame:FindFirstChild("ClickArea") or HammerMinigame
+                local posX = ClickArea.AbsolutePosition.X + ClickArea.AbsoluteSize.X / 2
+                local posY = ClickArea.AbsolutePosition.Y + ClickArea.AbsoluteSize.Y / 2
+                simulateClick(posX, posY)
+            end
+            return
+        end
     end
 
     -- ============================================
@@ -175,21 +156,19 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         Default = false,
         Tooltip = "Complète automatiquement les minijeux",
         Callback = function(Value)
+            AutoForgeEnabled = Value
+
             if Value then
-                MinigameConnection = RunService.RenderStepped:Connect(function()
-                    AutoMelt()
-                    AutoPour()
-                    AutoHammer()
-                end)
+                MinigameConnection = RunService.RenderStepped:Connect(AutoForge)
             else
                 if MinigameConnection then
                     MinigameConnection:Disconnect()
                     MinigameConnection = nil
                 end
-                -- Reset les flags
-                MeltInProgress = false
-                PourInProgress = false
-                HammerInProgress = false
+                -- Reset cooldowns
+                lastMeltSkip = 0
+                lastPourSkip = 0
+                lastHammerClick = 0
             end
         end
     })
