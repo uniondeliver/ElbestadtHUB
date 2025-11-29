@@ -90,7 +90,9 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         -- Skip instantanément vers Pour
         pcall(function()
             local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
-            ChangeSequence:InvokeServer("Pour")
+            ChangeSequence:InvokeServer("Pour", {
+                ClientTime = tick()
+            })
         end)
 
         task.wait(0.2)
@@ -111,7 +113,9 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         -- Skip instantanément vers Hammer
         pcall(function()
             local ChangeSequence = ReplicatedStorage.Shared.Packages.Knit.Services.ForgeService.RF.ChangeSequence
-            ChangeSequence:InvokeServer("Hammer")
+            ChangeSequence:InvokeServer("Hammer", {
+                ClientTime = tick()
+            })
         end)
 
         task.wait(0.2)
