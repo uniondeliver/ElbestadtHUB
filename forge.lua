@@ -94,9 +94,11 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         if MeltMinigame and MeltMinigame.Visible then
             if not MeltSkipped then
                 MeltSkipped = true
-                task.wait(0.1)
-                pcall(function()
-                    ChangeSequence:InvokeServer("Pour", {ClientTime = tick()})
+                task.spawn(function()
+                    task.wait(0.5) -- Attend que le minigame s'initialise
+                    pcall(function()
+                        ChangeSequence:InvokeServer("Pour", {ClientTime = tick()})
+                    end)
                 end)
             end
             return
@@ -109,9 +111,11 @@ function ForgeModule.Setup(groupbox, autoGroupbox, Options, Toggles, Library)
         if PourMinigame and PourMinigame.Visible then
             if not PourSkipped then
                 PourSkipped = true
-                task.wait(0.1)
-                pcall(function()
-                    ChangeSequence:InvokeServer("Hammer", {ClientTime = tick()})
+                task.spawn(function()
+                    task.wait(0.5) -- Attend que le minigame s'initialise
+                    pcall(function()
+                        ChangeSequence:InvokeServer("Hammer", {ClientTime = tick()})
+                    end)
                 end)
             end
             return
